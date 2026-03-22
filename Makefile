@@ -1,4 +1,4 @@
-BIN := notion
+BIN := notion-cli
 INSTALL_DIR := $(HOME)/.local/bin
 
 .PHONY: build install clean
