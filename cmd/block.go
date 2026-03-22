@@ -69,6 +69,7 @@ func runBlockUpdate(cmd *cobra.Command, args []string) error {
 	}
 
 	text, _ := cmd.Flags().GetString("text")
+	text = unescapeNewlines(text)
 	rawJSON, _ := cmd.Flags().GetString("json")
 
 	if text == "" && rawJSON == "" {

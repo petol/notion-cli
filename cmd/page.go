@@ -3,12 +3,21 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/petol/notion-cli/internal/convert"
 	"github.com/petol/notion-cli/internal/notion"
 	"github.com/petol/notion-cli/internal/render"
 	"github.com/spf13/cobra"
 )
+
+// unescapeNewlines converts literal \n and \t sequences (as produced by LLMs
+// passing multiline content through shell command strings) into real newlines/tabs.
+func unescapeNewlines(s string) string {
+	s = strings.ReplaceAll(s, `\n`, "\n")
+	s = strings.ReplaceAll(s, `\t`, "\t")
+	return s
+}
 
 var pageCmd = &cobra.Command{
 	Use:   "page",
@@ -257,6 +266,7 @@ func runPageAppend(cmd *cobra.Command, args []string) error {
 	}
 
 	md, _ := cmd.Flags().GetString("markdown")
+	md = unescapeNewlines(md)
 	blocks := convert.MarkdownToBlocks(md)
 
 	resp, err := c.AppendBlockChildren(args[0], blocks)
