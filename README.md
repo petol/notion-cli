@@ -1,5 +1,5 @@
 # notion-cli
-
+100% AI Slop. 
 A minimal CLI for the Notion API, designed for use as an LLM tool. Lightweight alternative to the Notion MCP server.
 
 - Single static binary (pure Go, no dynamic linking)
