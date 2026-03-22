@@ -1,6 +1,6 @@
 # Build output
-notion
-notion-cli
+/notion
+/notion-cli
 /dist/
 
 # Environment / secrets

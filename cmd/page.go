@@ -85,7 +85,7 @@ func runPageGet(_ *cobra.Command, args []string) error {
 func fetchAllBlocks(c *notion.Client, id string) ([]notion.Block, error) {
 	var all []notion.Block
 	cursor := ""
-	for {
+	for len(all) < notion.MaxItems {
 		resp, err := c.GetBlockChildren(id, cursor)
 		if err != nil {
 			return nil, err

@@ -44,7 +44,7 @@ func runCommentsGet(_ *cobra.Command, args []string) error {
 
 	var all []notion.Comment
 	cursor := ""
-	for {
+	for len(all) < notion.MaxItems {
 		resp, err := c.GetComments(args[0], cursor)
 		if err != nil {
 			writeError(err)

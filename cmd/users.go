@@ -25,7 +25,7 @@ func runUsers(_ *cobra.Command, _ []string) error {
 
 	var all []notion.User
 	cursor := ""
-	for {
+	for len(all) < notion.MaxItems {
 		resp, err := c.ListUsers(cursor)
 		if err != nil {
 			writeError(err)

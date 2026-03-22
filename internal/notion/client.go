@@ -7,9 +7,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 )
+
+// MaxItems is the maximum number of items fetched across paginated calls.
+// Prevents unbounded memory growth on very large workspaces.
+const MaxItems = 5000
 
 const (
 	baseURL       = "https://api.notion.com/v1"
@@ -92,7 +97,7 @@ func (c *Client) Search(query string) (*SearchResponse, error) {
 
 func (c *Client) GetPage(id string) (*Page, error) {
 	var out Page
-	err := c.do("GET", "/pages/"+id, nil, &out)
+	err := c.do("GET", "/pages/"+url.PathEscape(id), nil, &out)
 	return &out, err
 }
 
@@ -103,9 +108,9 @@ func (c *Client) CreatePage(req PageCreateRequest) (*Page, error) {
 }
 
 func (c *Client) GetBlockChildren(id, cursor string) (*BlockChildrenResponse, error) {
-	path := "/blocks/" + id + "/children?page_size=100"
+	path := "/blocks/" + url.PathEscape(id) + "/children?page_size=100"
 	if cursor != "" {
-		path += "&start_cursor=" + cursor
+		path += "&start_cursor=" + url.QueryEscape(cursor)
 	}
 	var out BlockChildrenResponse
 	err := c.do("GET", path, nil, &out)
@@ -114,48 +119,48 @@ func (c *Client) GetBlockChildren(id, cursor string) (*BlockChildrenResponse, er
 
 func (c *Client) AppendBlockChildren(id string, blocks []Block) (*BlockChildrenResponse, error) {
 	var out BlockChildrenResponse
-	err := c.do("PATCH", "/blocks/"+id+"/children", AppendBlocksRequest{Children: blocks}, &out)
+	err := c.do("PATCH", "/blocks/"+url.PathEscape(id)+"/children", AppendBlocksRequest{Children: blocks}, &out)
 	return &out, err
 }
 
 func (c *Client) GetDatabase(id string) (*Database, error) {
 	var out Database
-	err := c.do("GET", "/databases/"+id, nil, &out)
+	err := c.do("GET", "/databases/"+url.PathEscape(id), nil, &out)
 	return &out, err
 }
 
 func (c *Client) QueryDatabase(id string, req DatabaseQueryRequest) (*DatabaseQueryResponse, error) {
 	var out DatabaseQueryResponse
-	err := c.do("POST", "/databases/"+id+"/query", req, &out)
+	err := c.do("POST", "/databases/"+url.PathEscape(id)+"/query", req, &out)
 	return &out, err
 }
 
 func (c *Client) UpdatePage(id string, req PageUpdateRequest) (*Page, error) {
 	var out Page
-	err := c.do("PATCH", "/pages/"+id, req, &out)
+	err := c.do("PATCH", "/pages/"+url.PathEscape(id), req, &out)
 	return &out, err
 }
 
 func (c *Client) GetBlock(id string) (*Block, error) {
 	var out Block
-	err := c.do("GET", "/blocks/"+id, nil, &out)
+	err := c.do("GET", "/blocks/"+url.PathEscape(id), nil, &out)
 	return &out, err
 }
 
 func (c *Client) UpdateBlock(id string, body any) (*Block, error) {
 	var out Block
-	err := c.do("PATCH", "/blocks/"+id, body, &out)
+	err := c.do("PATCH", "/blocks/"+url.PathEscape(id), body, &out)
 	return &out, err
 }
 
 func (c *Client) DeleteBlock(id string) error {
-	return c.do("DELETE", "/blocks/"+id, nil, nil)
+	return c.do("DELETE", "/blocks/"+url.PathEscape(id), nil, nil)
 }
 
 func (c *Client) ListUsers(cursor string) (*UsersResponse, error) {
 	path := "/users?page_size=100"
 	if cursor != "" {
-		path += "&start_cursor=" + cursor
+		path += "&start_cursor=" + url.QueryEscape(cursor)
 	}
 	var out UsersResponse
 	err := c.do("GET", path, nil, &out)
@@ -163,9 +168,9 @@ func (c *Client) ListUsers(cursor string) (*UsersResponse, error) {
 }
 
 func (c *Client) GetComments(blockID, cursor string) (*CommentsResponse, error) {
-	path := "/comments?block_id=" + blockID + "&page_size=100"
+	path := "/comments?block_id=" + url.QueryEscape(blockID) + "&page_size=100"
 	if cursor != "" {
-		path += "&start_cursor=" + cursor
+		path += "&start_cursor=" + url.QueryEscape(cursor)
 	}
 	var out CommentsResponse
 	err := c.do("GET", path, nil, &out)
@@ -180,6 +185,6 @@ func (c *Client) CreateComment(req CommentCreateRequest) (*Comment, error) {
 
 func (c *Client) GetPageProperty(pageID, propertyID string) (json.RawMessage, error) {
 	var out json.RawMessage
-	err := c.do("GET", "/pages/"+pageID+"/properties/"+propertyID, nil, &out)
+	err := c.do("GET", "/pages/"+url.PathEscape(pageID)+"/properties/"+url.PathEscape(propertyID), nil, &out)
 	return out, err
 }

@@ -86,8 +86,13 @@ func runDBQuery(cmd *cobra.Command, args []string) error {
 		req.Sorts = json.RawMessage(sortJSON)
 	}
 
+	cap := notion.MaxItems
+	if limit > 0 && limit < cap {
+		cap = limit
+	}
+
 	var allResults []notion.Page
-	for {
+	for len(allResults) < cap {
 		resp, err := c.QueryDatabase(args[0], req)
 		if err != nil {
 			writeError(err)
@@ -99,11 +104,10 @@ func runDBQuery(cmd *cobra.Command, args []string) error {
 		if !resp.HasMore {
 			break
 		}
-		if limit > 0 && len(allResults) >= limit {
-			allResults = allResults[:limit]
-			break
-		}
 		req.StartCursor = resp.NextCursor
+	}
+	if len(allResults) > cap {
+		allResults = allResults[:cap]
 	}
 
 	outputJSON(map[string]any{
