@@ -87,9 +87,8 @@ func runCommentsAdd(cmd *cobra.Command, args []string) error {
 		Parent: parent,
 		RichText: []notion.RichText{
 			{
-				Type:      "text",
-				PlainText: text,
-				Text:      &notion.TextContent{Content: text},
+				Type: "text",
+				Text: &notion.TextContent{Content: text},
 			},
 		},
 	}
@@ -133,9 +132,8 @@ func runCommentsReply(cmd *cobra.Command, args []string) error {
 		DiscussionID: args[0],
 		RichText: []notion.RichText{
 			{
-				Type:      "text",
-				PlainText: text,
-				Text:      &notion.TextContent{Content: text},
+				Type: "text",
+				Text: &notion.TextContent{Content: text},
 			},
 		},
 	}

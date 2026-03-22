@@ -5,7 +5,7 @@ import "encoding/json"
 // RichText represents a Notion rich text object.
 type RichText struct {
 	Type        string       `json:"type"`
-	PlainText   string       `json:"plain_text"`
+	PlainText   string       `json:"plain_text,omitempty"`
 	Text        *TextContent `json:"text,omitempty"`
 	Annotations *Annotations `json:"annotations,omitempty"`
 	Href        *string      `json:"href,omitempty"`
@@ -30,10 +30,10 @@ type Link struct {
 // Block represents a Notion block. The Type field determines which content
 // field is populated. Using a flat struct avoids type assertions.
 type Block struct {
-	Object      string `json:"object"`
-	ID          string `json:"id"`
+	Object      string `json:"object,omitempty"`
+	ID          string `json:"id,omitempty"`
 	Type        string `json:"type"`
-	HasChildren bool   `json:"has_children"`
+	HasChildren bool   `json:"has_children,omitempty"`
 
 	Paragraph        *RichTextBlock  `json:"paragraph,omitempty"`
 	Heading1         *RichTextBlock  `json:"heading_1,omitempty"`

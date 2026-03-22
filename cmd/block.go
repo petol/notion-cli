@@ -99,9 +99,8 @@ func runBlockUpdate(cmd *cobra.Command, args []string) error {
 		// Build rich_text replacement from --text
 		richText := []notion.RichText{
 			{
-				Type:      "text",
-				PlainText: text,
-				Text:      &notion.TextContent{Content: text},
+				Type: "text",
+				Text: &notion.TextContent{Content: text},
 			},
 		}
 		rtJSON, _ := json.Marshal(map[string]any{"rich_text": richText})

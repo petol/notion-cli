@@ -81,9 +81,8 @@ func MarkdownToBlocks(md string) []notion.Block {
 func makeRichText(content string) []notion.RichText {
 	return []notion.RichText{
 		{
-			Type:      "text",
-			PlainText: content,
-			Text:      &notion.TextContent{Content: content},
+			Type: "text",
+			Text: &notion.TextContent{Content: content},
 		},
 	}
 }
