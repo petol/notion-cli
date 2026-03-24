@@ -34,8 +34,11 @@ notion page get <page-id>
 notion page create --parent <page-id> --title "My Page"
 notion page create --parent <db-id> --parent-type database --title "New Entry"
 
-# Append markdown content
+# Append markdown content as blocks
 notion page append <page-id> --markdown "# Section\nSome **bold** text"
+
+# Append a table
+notion page append <page-id> --markdown "| Name | Role |\n|------|------|\n| Alice | Admin |\n| Bob | User |"
 
 # Update properties
 notion page update <page-id> --title "New Title"
@@ -46,6 +49,25 @@ notion page update <page-id> --restore
 # Get a specific property item (useful for large relation/rollup fields)
 notion page property <page-id> <property-id>
 ```
+
+### Appending blocks
+
+`page append` converts markdown to Notion blocks. Literal `\n` and `\t` in the string are converted to real newlines/tabs.
+
+| Markdown | Block type |
+|---|---|
+| `# text` | heading_1 |
+| `## text` | heading_2 |
+| `### text` | heading_3 |
+| `- text` / `* text` | bulleted_list_item |
+| `1. text` | numbered_list_item |
+| `- [ ] text` | to_do (unchecked) |
+| `- [x] text` | to_do (checked) |
+| ` ``` lang ... ``` ` | code (language preserved) |
+| `> text` | quote |
+| `---` | divider |
+| GFM table | table (first row = column header) |
+| plain text | paragraph |
 
 ### Blocks
 
