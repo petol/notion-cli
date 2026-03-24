@@ -46,9 +46,22 @@ type Block struct {
 	Quote            *RichTextBlock  `json:"quote,omitempty"`
 	Callout          *RichTextBlock  `json:"callout,omitempty"`
 	Toggle           *RichTextBlock  `json:"toggle,omitempty"`
-	ChildPage        *ChildPageBlock `json:"child_page,omitempty"`
-	Image            *FileBlock      `json:"image,omitempty"`
+	ChildPage        *ChildPageBlock  `json:"child_page,omitempty"`
+	Image            *FileBlock       `json:"image,omitempty"`
+	Table            *TableContent    `json:"table,omitempty"`
+	TableRow         *TableRowContent `json:"table_row,omitempty"`
 	// Divider has no content fields
+}
+
+type TableContent struct {
+	TableWidth      int     `json:"table_width"`
+	HasColumnHeader bool    `json:"has_column_header"`
+	HasRowHeader    bool    `json:"has_row_header"`
+	Children        []Block `json:"children,omitempty"`
+}
+
+type TableRowContent struct {
+	Cells [][]RichText `json:"cells"`
 }
 
 type RichTextBlock struct {

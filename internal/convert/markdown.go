@@ -9,7 +9,7 @@ import (
 // MarkdownToBlocks converts a markdown string to a slice of Notion blocks.
 // Supports: headings (#/##/###), bullet lists (-/*), numbered lists (1.),
 // to-do items (- [ ] / - [x]), code fences (```), blockquotes (>),
-// dividers (---), and paragraphs. Nested lists are flattened.
+// dividers (---), GFM tables (| col | col |), and paragraphs. Nested lists are flattened.
 func MarkdownToBlocks(md string) []notion.Block {
 	var blocks []notion.Block
 	lines := strings.Split(strings.TrimSpace(md), "\n")
@@ -17,6 +17,23 @@ func MarkdownToBlocks(md string) []notion.Block {
 	i := 0
 	for i < len(lines) {
 		line := lines[i]
+
+		// Table: collect all consecutive pipe-prefixed lines, check for separator row
+		if strings.HasPrefix(strings.TrimSpace(line), "|") {
+			var tableLines []string
+			for i < len(lines) && strings.HasPrefix(strings.TrimSpace(lines[i]), "|") {
+				tableLines = append(tableLines, lines[i])
+				i++
+			}
+			if len(tableLines) >= 2 && isTableSeparator(tableLines[1]) {
+				blocks = append(blocks, makeTable(tableLines))
+			} else {
+				for _, tl := range tableLines {
+					blocks = append(blocks, makeParagraph(tl))
+				}
+			}
+			continue
+		}
 
 		// Code fence
 		if strings.HasPrefix(line, "```") {
@@ -163,5 +180,75 @@ func makeDivider() notion.Block {
 	return notion.Block{
 		Object: "block",
 		Type:   "divider",
+	}
+}
+
+// isTableSeparator returns true for lines like |---|:---|:---:| that separate
+// a table header from its body.
+func isTableSeparator(line string) bool {
+	trimmed := strings.TrimSpace(line)
+	if !strings.ContainsRune(trimmed, '-') {
+		return false
+	}
+	for _, c := range trimmed {
+		if c != '|' && c != '-' && c != ':' && c != ' ' {
+			return false
+		}
+	}
+	return true
+}
+
+// parseTableCells splits a markdown table row like "| a | b | c |" into cells.
+func parseTableCells(line string) [][]notion.RichText {
+	parts := strings.Split(line, "|")
+	var cells [][]notion.RichText
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		cells = append(cells, makeRichText(p))
+	}
+	return cells
+}
+
+// makeTable builds a Notion table block from collected markdown table lines.
+// lines[0] is the header row, lines[1] is the separator, lines[2:] are data rows.
+func makeTable(lines []string) notion.Block {
+	headerCells := parseTableCells(lines[0])
+	width := len(headerCells)
+	if width == 0 {
+		width = 1
+	}
+
+	padCells := func(cells [][]notion.RichText) [][]notion.RichText {
+		for len(cells) < width {
+			cells = append(cells, makeRichText(""))
+		}
+		return cells[:width]
+	}
+
+	rows := []notion.Block{{
+		Object:   "block",
+		Type:     "table_row",
+		TableRow: &notion.TableRowContent{Cells: padCells(headerCells)},
+	}}
+	for _, line := range lines[2:] {
+		cells := padCells(parseTableCells(line))
+		rows = append(rows, notion.Block{
+			Object:   "block",
+			Type:     "table_row",
+			TableRow: &notion.TableRowContent{Cells: cells},
+		})
+	}
+
+	return notion.Block{
+		Object: "block",
+		Type:   "table",
+		Table: &notion.TableContent{
+			TableWidth:      width,
+			HasColumnHeader: true,
+			Children:        rows,
+		},
 	}
 }

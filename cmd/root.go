@@ -46,7 +46,16 @@ Appending blocks (page append):
     fenced code  -> code block (language tag preserved)
     > text       -> quote
     ---          -> divider
+    GFM table    -> table block (see below)
     plain text   -> paragraph
+
+  Tables use GitHub-Flavored Markdown syntax. The separator row (|---|---|)
+  marks the first row as a header. Columns are inferred from the header width.
+
+    | Name  | Role  |
+    |-------|-------|
+    | Alice | Admin |
+    | Bob   | User  |
 
   Example:
     notion page append <page-id> --markdown '# Title\n- Item one\n- Item two\n---\nDone.'`,
